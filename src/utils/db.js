@@ -1,6 +1,6 @@
 const DB_NAME = "chatwoot_tools_db";
-const STORE_NAME = "source_items";
-const DB_VERSION = 1;
+const STORE_NAME = "automations";
+const DB_VERSION = 2;
 
 export function openDB() {
   return new Promise((resolve, reject) => {
@@ -9,7 +9,10 @@ export function openDB() {
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+        db.createObjectStore(STORE_NAME, {
+          keyPath: "id",
+          autoIncrement: true,
+        });
       }
     };
 
@@ -84,4 +87,3 @@ export async function clearItems() {
     request.onerror = () => reject(request.error);
   });
 }
-

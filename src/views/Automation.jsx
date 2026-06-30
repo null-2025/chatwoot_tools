@@ -1,10 +1,20 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
-import { getAllItems, addItem, updateItem, deleteItem, clearItems } from "../utils/db";
+import {
+  getAllItems,
+  addItem,
+  updateItem,
+  deleteItem,
+  clearItems,
+} from "../utils/db";
+import { useCredentials } from "../hooks/useCredentials";
+import { SyncModal } from "../components/SyncModal";
 
 export function Automation({ navigate }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const { accountId, apiToken } = useCredentials();
 
   useEffect(() => {
     let active = true;
@@ -27,7 +37,7 @@ export function Automation({ navigate }) {
   }, []);
 
   const handleAddNew = async () => {
-    const newItem = { intent: "", keywords: "", response: "" };
+    const newItem = { active: true, intent: "", keywords: "", response: "" };
     try {
       const id = await addItem(newItem);
       setItems((prev) => [...prev, { ...newItem, id }]);
@@ -60,9 +70,9 @@ export function Automation({ navigate }) {
   };
 
   const [colWidths, setColWidths] = useState({
-    intent: 180,
+    intent: 150,
     keywords: 260,
-    response: 460,
+    response: 360,
   });
 
   const handleMouseDown = (e, colName) => {
@@ -95,10 +105,11 @@ export function Automation({ navigate }) {
         const response = (item.response || "").trim();
         return intent !== "" || keywords !== "" || response !== "";
       })
-      .map(({ intent, keywords, response }) => ({
-        intent: intent || "",
-        keywords: keywords || "",
-        response: response || "",
+      .map((item) => ({
+        active: item.active !== false,
+        intent: item.intent || "",
+        keywords: item.keywords || "",
+        response: item.response || "",
       }));
 
     if (validItems.length === 0) {
@@ -154,6 +165,7 @@ export function Automation({ navigate }) {
             return intent !== "" || keywords !== "" || response !== "";
           })
           .map((item) => ({
+            active: item.active !== false,
             intent: (item.intent || "").trim(),
             keywords: (item.keywords || "").trim(),
             response: (item.response || "").trim(),
@@ -207,7 +219,7 @@ export function Automation({ navigate }) {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900 shadow-sm transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-950 text-xs font-medium"
           >
             <Icon icon="lucide:upload" className="w-3.5 h-3.5" />
-            Import
+            <span className="hidden sm:inline">Import</span>
           </label>
           <button
             onClick={handleExport}
@@ -215,7 +227,15 @@ export function Automation({ navigate }) {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 hover:text-zinc-900 shadow-sm transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-950 text-xs font-medium"
           >
             <Icon icon="lucide:download" className="w-3.5 h-3.5" />
-            Export
+            <span className="hidden sm:inline">Export</span>
+          </button>
+          <button
+            onClick={() => setIsSyncModalOpen(true)}
+            title="Sync with Chatwoot API"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-200 bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-950 text-xs font-medium"
+          >
+            <Icon icon="heroicons:arrow-path" className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Sync</span>
           </button>
           <button
             onClick={handleAddNew}
@@ -232,11 +252,12 @@ export function Automation({ navigate }) {
         <table
           className="min-w-full border-collapse text-left text-sm text-zinc-600 table-fixed"
           style={{
-            width: `${48 + colWidths.intent + colWidths.keywords + colWidths.response + 64}px`,
+            width: `${48 + 64 + colWidths.intent + colWidths.keywords + colWidths.response + 64}px`,
           }}
         >
           <colgroup>
             <col style={{ width: "48px" }} />
+            <col style={{ width: "64px" }} />
             <col style={{ width: `${colWidths.intent}px` }} />
             <col style={{ width: `${colWidths.keywords}px` }} />
             <col style={{ width: `${colWidths.response}px` }} />
@@ -246,6 +267,9 @@ export function Automation({ navigate }) {
             <tr>
               <th className="w-12 px-3 py-2 border-r border-zinc-200 bg-zinc-100/50 text-center text-zinc-400 font-mono">
                 #
+              </th>
+              <th className="w-16 px-3 py-2 border-r border-zinc-200 text-center text-zinc-500">
+                Active
               </th>
               <th className="relative px-4 py-2 border-r border-zinc-200">
                 <span className="block truncate pr-2">Intent</span>
@@ -280,6 +304,9 @@ export function Automation({ navigate }) {
                   <td className="px-3 py-3 border-r border-zinc-200 bg-zinc-50/50 text-center">
                     <div className="h-3 w-4 bg-zinc-200 rounded mx-auto" />
                   </td>
+                  <td className="p-3 border-r border-zinc-200 bg-zinc-50/10 text-center">
+                    <div className="h-4 w-4 bg-zinc-200 rounded mx-auto" />
+                  </td>
                   <td className="p-3 border-r border-zinc-200">
                     <div className="h-4 bg-zinc-200 rounded w-3/4" />
                   </td>
@@ -297,7 +324,7 @@ export function Automation({ navigate }) {
             ) : items.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="text-center py-12 text-zinc-400 text-sm"
                 >
                   No items found. Click "Add Row" to create one.
@@ -311,6 +338,26 @@ export function Automation({ navigate }) {
                 >
                   <td className="px-3 py-2.5 border-r border-zinc-200 bg-zinc-50/30 text-center font-mono text-xs text-zinc-400 select-none align-top">
                     {index + 1}
+                  </td>
+                  <td className="p-0 border-r border-zinc-200 align-top text-center bg-zinc-50/10">
+                    <div className="flex items-center justify-center h-full min-h-[38px] py-2">
+                      <input
+                        type="checkbox"
+                        checked={item.active !== false}
+                        onChange={(e) => {
+                          handleFieldChange(
+                            item.id,
+                            "active",
+                            e.target.checked,
+                          );
+                          handleFieldBlur({
+                            ...item,
+                            active: e.target.checked,
+                          });
+                        }}
+                        className="w-4 h-4 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950 cursor-pointer"
+                      />
+                    </div>
                   </td>
                   <td className="p-0 border-r border-zinc-200 align-top">
                     <textarea
@@ -389,6 +436,14 @@ export function Automation({ navigate }) {
           </tbody>
         </table>
       </div>
+      
+      <SyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        accountId={accountId}
+        apiToken={apiToken}
+        items={items}
+      />
     </div>
   );
 }
