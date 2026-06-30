@@ -69,6 +69,19 @@ export function Automation({ navigate }) {
     }
   };
 
+  const handleToggleAllActive = async () => {
+    if (items.length === 0) return;
+    const anyInactive = items.some((item) => item.active === false);
+    const newActiveState = anyInactive;
+    const updatedItems = items.map((item) => ({ ...item, active: newActiveState }));
+    setItems(updatedItems);
+    try {
+      await Promise.all(updatedItems.map((item) => updateItem(item)));
+    } catch (error) {
+      console.error("Failed to update all items:", error);
+    }
+  };
+
   const [colWidths, setColWidths] = useState({
     intent: 150,
     keywords: 260,
@@ -268,8 +281,22 @@ export function Automation({ navigate }) {
               <th className="w-12 px-3 py-2 border-r border-zinc-200 bg-zinc-100/50 text-center text-zinc-400 font-mono">
                 #
               </th>
-              <th className="w-16 px-3 py-2 border-r border-zinc-200 text-center text-zinc-500">
-                Active
+              <th className="w-16 px-3 py-2 border-r border-zinc-200 text-zinc-500">
+                <div className="flex items-center justify-center gap-1">
+                  <span>Active</span>
+                  {items.length > 0 && (
+                    <button
+                      onClick={handleToggleAllActive}
+                      title={items.some((item) => item.active === false) ? "Check all" : "Uncheck all"}
+                      className="p-0.5 rounded hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"
+                    >
+                      <Icon
+                        icon={items.every((item) => item.active !== false) ? "lucide:check-square" : "lucide:square"}
+                        className="w-3.5 h-3.5"
+                      />
+                    </button>
+                  )}
+                </div>
               </th>
               <th className="relative px-4 py-2 border-r border-zinc-200">
                 <span className="block truncate pr-2">Intent</span>
