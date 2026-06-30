@@ -7,14 +7,14 @@ import {
   deleteItem,
   clearItems,
 } from "../utils/db";
-import { useCredentials } from "../hooks/useCredentials";
+import { useProxy } from "../hooks/useProxy";
 import { SyncModal } from "../components/SyncModal";
 
 export function Automation({ navigate }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
-  const { accountId, apiToken } = useCredentials();
+  const { accountId } = useProxy();
 
   useEffect(() => {
     let active = true;
@@ -441,7 +441,6 @@ export function Automation({ navigate }) {
         isOpen={isSyncModalOpen}
         onClose={() => setIsSyncModalOpen(false)}
         accountId={accountId}
-        apiToken={apiToken}
         items={items}
       />
     </div>

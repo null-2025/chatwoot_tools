@@ -6,13 +6,4 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: "/chatwoot_tools/",
-  server: {
-    proxy: {
-      "/chatwoot-api": {
-        target: "https://app.chatwoot.com",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/chatwoot-api/, ""),
-      },
-    },
-  },
 });

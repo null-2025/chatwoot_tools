@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
 
-export function SyncModal({ isOpen, onClose, accountId, apiToken, items }) {
+export function SyncModal({ isOpen, onClose, accountId, items }) {
   const [logs, setLogs] = useState([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const logEndRef = useRef(null);
@@ -35,12 +35,9 @@ export function SyncModal({ isOpen, onClose, accountId, apiToken, items }) {
 
     const headers = {
       "Content-Type": "application/json",
-      api_access_token: apiToken,
     };
 
-    const baseUrl = import.meta.env.DEV
-      ? `/chatwoot-api/api/v1/accounts/${accountId}/automation_rules`
-      : `https://app.chatwoot.com/api/v1/accounts/${accountId}/automation_rules`;
+    const baseUrl = `http://localhost:8765/api/v1/accounts/${accountId}/automation_rules`;
 
     try {
       // Step 1: Fetch Existing Rules

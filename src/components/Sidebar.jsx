@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 
-export function Sidebar({
-  accountId,
-  setAccountId,
-  apiToken,
-  setApiToken,
-  isLoggedIn,
-  activeView,
-  navigate,
-}) {
+export function Sidebar({ isConnected, activeView, navigate }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [activeTab, setActiveTab] = useState("bun");
+
+  const proxyUrl =
+    `${window.location.origin}${import.meta.env.BASE_URL}proxy.js`.replace(
+      /([^:]\/)\/+/g,
+      "$1",
+    );
 
   return (
     <aside className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-zinc-200 flex flex-col p-6 shrink-0 overflow-y-auto max-h-[40vh] md:max-h-full transition-all">
@@ -26,11 +25,15 @@ export function Sidebar({
           <h1 className="text-base font-bold tracking-tight text-zinc-950 leading-none">
             Chatwoot Tools
           </h1>
-          <span
-            className={`w-2 h-2 rounded-full ${
-              isLoggedIn ? "bg-emerald-500 animate-pulse" : "bg-amber-400"
-            }`}
-          />
+          {isConnected ? (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-semibold border border-emerald-200 leading-none shrink-0">
+              Connected
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-semibold border border-amber-200 leading-none shrink-0">
+              Disconnected
+            </span>
+          )}
         </div>
 
         <button
@@ -53,40 +56,45 @@ export function Sidebar({
       >
         <hr className="border-zinc-100 -mx-6 mb-6 mt-6" />
 
-        {/* Credentials Form */}
-        <div className="space-y-3">
-          <div className="space-y-1.5">
-            <label
-              htmlFor="sidebar-account-id"
-              className="block text-xs font-medium text-zinc-500"
-            >
-              Account ID
-            </label>
-            <input
-              id="sidebar-account-id"
-              type="text"
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
-              placeholder="e.g. 1"
-              className="w-full rounded-md border border-zinc-200 bg-zinc-50/50 px-3 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:border-zinc-950 transition-all"
-            />
-          </div>
+        {/* Proxy Instructions */}
+        <div className="space-y-4">
+          <div className="space-y-3">
+            {/* Tabs Header */}
+            <div className="flex border-b border-zinc-200 text-xs">
+              <button
+                onClick={() => setActiveTab("bun")}
+                className={`flex-1 py-1.5 text-center font-medium border-b-2 transition-all cursor-pointer ${
+                  activeTab === "bun"
+                    ? "border-zinc-950 text-zinc-950 font-semibold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900"
+                }`}
+              >
+                Bun
+              </button>
+              <button
+                onClick={() => setActiveTab("node")}
+                className={`flex-1 py-1.5 text-center font-medium border-b-2 transition-all cursor-pointer ${
+                  activeTab === "node"
+                    ? "border-zinc-950 text-zinc-950 font-semibold"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900"
+                }`}
+              >
+                Node
+              </button>
+            </div>
 
-          <div className="space-y-1.5">
-            <label
-              htmlFor="sidebar-api-token"
-              className="block text-xs font-medium text-zinc-500"
-            >
-              API Access Token
-            </label>
-            <input
-              id="sidebar-api-token"
-              type="password"
-              value={apiToken}
-              onChange={(e) => setApiToken(e.target.value)}
-              placeholder="Enter access token"
-              className="w-full rounded-md border border-zinc-200 bg-zinc-50/50 px-3 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-950 focus:border-zinc-950 transition-all"
-            />
+            {/* Tab Contents */}
+            <div className="p-3 bg-zinc-950 text-zinc-300 rounded-lg border border-zinc-800 shadow-inner font-mono text-[10px] leading-relaxed break-all whitespace-pre-wrap">
+              {activeTab === "bun" ? (
+                <div className="text-emerald-400 select-all">
+                  curl -s {proxyUrl} | bun run - --id 123 --access-token "xxx"
+                </div>
+              ) : (
+                <div className="text-amber-400 select-all">
+                  curl -s {proxyUrl} | node - --id 123 --access-token "xxx"
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -113,14 +121,14 @@ export function Sidebar({
 
           <button
             onClick={() => {
-              if (isLoggedIn) {
+              if (isConnected) {
                 navigate("/automation");
                 setIsCollapsed(true);
               }
             }}
-            disabled={!isLoggedIn}
+            disabled={!isConnected}
             className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-md font-medium transition-all border-none bg-transparent ${
-              !isLoggedIn
+              !isConnected
                 ? "text-zinc-400 opacity-50 cursor-not-allowed"
                 : activeView === "/automation"
                   ? "bg-zinc-100 text-zinc-950 font-semibold cursor-pointer"
@@ -137,4 +145,3 @@ export function Sidebar({
     </aside>
   );
 }
-
