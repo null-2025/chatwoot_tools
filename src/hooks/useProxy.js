@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 export function useProxy() {
   const [isConnected, setIsConnected] = useState(false);
   const [accountId, setAccountId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let interval;
@@ -22,6 +23,8 @@ export function useProxy() {
       } catch (e) {
         setIsConnected(false);
         setAccountId(null);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -31,5 +34,5 @@ export function useProxy() {
     return () => clearInterval(interval);
   }, []);
 
-  return { isConnected, accountId };
+  return { isConnected, accountId, loading };
 }

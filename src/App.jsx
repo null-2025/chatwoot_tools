@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Icon } from "@iconify/react";
 import { useProxy } from "./hooks/useProxy";
 import { useRouter } from "./hooks/useRouter";
 import { Sidebar } from "./components/Sidebar";
@@ -7,20 +8,27 @@ import { Automation } from "./views/Automation";
 import "./App.css";
 
 function App() {
-  const { isConnected } = useProxy();
-
-  const { currentPath, setCurrentPath, navigate } = useRouter();
+  const { isConnected, loading } = useProxy();
+  const { currentPath, navigate } = useRouter();
 
   // Auth Guard: Redirect back to '/' if logged out and on another page
   useEffect(() => {
+    if (loading) return;
     if (!isConnected && currentPath !== "/") {
-      window.history.replaceState({}, "", "/");
-      setCurrentPath("/");
+      navigate("/", { replace: true });
     }
-  }, [isConnected, currentPath, setCurrentPath]);
+  }, [isConnected, currentPath, navigate, loading]);
 
   // Determine active view based on guard and pathname
   const activeView = isConnected ? currentPath : "/";
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-zinc-50 text-zinc-400">
+        <Icon icon="heroicons:arrow-path" className="w-6 h-6 animate-spin text-zinc-400" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-zinc-50/50 text-zinc-900 font-sans overflow-hidden">
