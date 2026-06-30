@@ -3,11 +3,9 @@ import { Icon } from "@iconify/react";
 export function Dashboard({ isLoggedIn, navigate }) {
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="border-b border-zinc-200 pb-5">
-        <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
-          Tools
-        </h2>
+      {/* Navigation Breadcrumbs */}
+      <div className="flex items-center gap-2 text-xs text-zinc-400 select-none">
+        <span className="text-zinc-600 font-medium">Dashboard</span>
       </div>
 
       {/* Tools Section Grid */}
@@ -31,12 +29,16 @@ export function Dashboard({ isLoggedIn, navigate }) {
           }`}
         >
           <div className="flex items-center gap-2 font-bold text-zinc-900">
-            <Icon icon="lucide:settings" className="w-4 h-4 shrink-0" />
+            <div className="w-4 h-4 flex items-center justify-center shrink-0">
+              <Icon icon="lucide:settings" className="w-4 h-4" />
+            </div>
             <span>Automation</span>
           </div>
-          {!isLoggedIn && (
-            <Icon icon="lucide:lock" className="w-4 h-4 text-zinc-400" />
-          )}
+          <div className="w-4 h-4 flex items-center justify-center shrink-0">
+            {!isLoggedIn && (
+              <Icon icon="lucide:lock" className="w-4 h-4 text-zinc-400" />
+            )}
+          </div>
         </div>
       </div>
     </div>

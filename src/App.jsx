@@ -7,13 +7,8 @@ import { Automation } from "./views/Automation";
 import "./App.css";
 
 function App() {
-  const {
-    accountId,
-    setAccountId,
-    apiToken,
-    setApiToken,
-    isLoggedIn,
-  } = useCredentials();
+  const { accountId, setAccountId, apiToken, setApiToken, isLoggedIn } =
+    useCredentials();
 
   const { currentPath, setCurrentPath, navigate } = useRouter();
 
@@ -29,7 +24,7 @@ function App() {
   const activeView = isLoggedIn ? currentPath : "/";
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-zinc-50/50 text-zinc-900 font-sans">
+    <div className="flex flex-col md:flex-row h-screen bg-zinc-50/50 text-zinc-900 font-sans overflow-hidden">
       {/* Sidebar Layout */}
       <Sidebar
         accountId={accountId}
@@ -42,7 +37,13 @@ function App() {
       />
 
       {/* Main Content Layout */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto max-w-5xl">
+      <main
+        className={`flex-1 w-full flex flex-col ${
+          activeView === "/automation"
+            ? "overflow-hidden"
+            : "p-2 md:p-4 overflow-y-auto"
+        }`}
+      >
         {activeView === "/automation" ? (
           <Automation navigate={navigate} />
         ) : (
